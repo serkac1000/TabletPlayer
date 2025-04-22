@@ -4,7 +4,7 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["libGL", "libGLU", "libvlc", "libxkbcommon", "qt6.full", "xorg.libX11", "xorg.libXcomposite", "xorg.libXcursor", "xorg.libXext", "xorg.libXft", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXrender", "xorg.libxkbcommon", "xorg.xinit", "xorg.xorgserver"]
+packages = ["libGL", "libGLU", "libvlc", "libxkbcommon", "qt6.full", "xorg.libX11", "xorg.libXcomposite", "xorg.libXcursor", "xorg.libXext", "xorg.libXft", "xorg.libXi", "xorg.libXinerama", "xorg.libXrandr", "xorg.libXrender", "xorg.libxkbcommon", "xorg.xinit", "xorg.xorgserver", "zstd"]
 
 [deployment]
 run = ["python3", "main.py"]
