@@ -10,6 +10,15 @@ resolution-markers = [
 ]
 
 [[package]]
+name = "mpv"
+version = "1.0.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/70/a9/fe30517ebfdc6a9ed5f1d03dfdf4901d078126620d6b600f0bdcc5aa665d/mpv-1.0.7.tar.gz", hash = "sha256:ae17d56176e05e4d046aa28a0732a478c0d58603e878e8da6d82b6c145ae1d82", size = 47052 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/aa/3f/d835556e34804cd0078507ed0f8a550f15d2861b875656193dd3451b720b/mpv-1.0.7-py3-none-any.whl", hash = "sha256:520fb134c18185b69c7fce4aa3514f14371028022d92eb193818e9fefb1e9fe8", size = 45257 },
+]
+
+[[package]]
 name = "numpy"
 version = "2.2.5"
 source = { registry = "https://pypi.org/simple" }
@@ -128,19 +137,32 @@ wheels = [
 ]
 
 [[package]]
+name = "python-mpv"
+version = "1.0.7"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/9d/d4/14857ae1406c3ea7a94a15449975876b914fd1b868d279d8794acf8b7ee6/python_mpv-1.0.7.tar.gz", hash = "sha256:afc2f2677b08dcccf1e9e7a76d64ee4f603541cf6a750ebf4cce957be90ec836", size = 51712 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/b3/3c1d36719f819985211bb036460329e00a85e969e11b0abf183b969adbdb/python_mpv-1.0.7-py3-none-any.whl", hash = "sha256:8546838b16abe6dc643832dabb84c4814c03f44cfb1d7f7dfda26ff79b9be236", size = 45347 },
+]
+
+[[package]]
 name = "python-template"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "mpv" },
     { name = "opencv-python" },
     { name = "pyqt6" },
+    { name = "python-mpv" },
     { name = "python-vlc" },
 ]
 
 [package.metadata]
 requires-dist = [
+    { name = "mpv", specifier = ">=1.0.7" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
     { name = "pyqt6", specifier = ">=6.9.0" },
+    { name = "python-mpv", specifier = ">=1.0.7" },
     { name = "python-vlc", specifier = ">=3.0.21203" },
 ]
 

@@ -5,7 +5,9 @@ description = ""
 authors = ["Your Name <you@example.com>"]
 requires-python = ">=3.11"
 dependencies = [
+    "mpv>=1.0.7",
     "opencv-python>=4.11.0.86",
     "pyqt6>=6.9.0",
+    "python-mpv>=1.0.7",
     "python-vlc>=3.0.21203",
 ]

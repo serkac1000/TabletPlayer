@@ -2,7 +2,7 @@
 import sys
 import os
 import json
-import vlc
+import mpv
 import cv2
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton, 
                            QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QScrollArea, QGridLayout)
@@ -164,25 +164,51 @@ class StartWindow(QWidget):
         self.setLayout(main_layout)
         
     def play_video(self, url):
-        # Initialize VLC with minimal configuration
-        instance = vlc.Instance()
-        self.player = instance.media_player_new()
-        media = instance.media_new(url)
-        self.player.set_media(media)
-        
         # Create video window
         self.video_window = QWidget()
         self.video_window.setWindowTitle("Video Player")
         self.video_window.setGeometry(300, 300, 800, 600)
-        self.video_window.setAttribute(Qt.WidgetAttribute.WA_DontCreateNativeAncestors)
-        self.video_window.setAttribute(Qt.WidgetAttribute.WA_NativeWindow)
+        
+        # Create controls
+        controls_layout = QHBoxLayout()
+        slower_btn = QPushButton("Slower")
+        faster_btn = QPushButton("Faster")
+        reset_speed_btn = QPushButton("Reset Speed")
+        self.speed_label = QLabel("1.0x")
+        
+        controls_layout.addWidget(slower_btn)
+        controls_layout.addWidget(self.speed_label)
+        controls_layout.addWidget(faster_btn)
+        controls_layout.addWidget(reset_speed_btn)
+        
+        main_layout = QVBoxLayout()
+        main_layout.addLayout(controls_layout)
+        self.video_window.setLayout(main_layout)
         self.video_window.show()
         
-        # Set window handle and play
-        self.player.set_xwindow(self.video_window.winId())
+        # Initialize MPV player
+        self.player = mpv.MPV(wid=str(int(self.video_window.winId())),
+                            input_default_bindings=True,
+                            input_vo_keyboard=True)
+        
+        # Set up speed control
+        self.current_speed = 1.0
+        slower_btn.clicked.connect(lambda: self.change_speed(-0.25))
+        faster_btn.clicked.connect(lambda: self.change_speed(0.25))
+        reset_speed_btn.clicked.connect(self.reset_speed)
         
         # Start playback
-        self.player.play()
+        self.player.play(url)
+        
+    def change_speed(self, delta):
+        self.current_speed = max(0.25, self.current_speed + delta)
+        self.player.speed = self.current_speed
+        self.speed_label.setText(f"{self.current_speed:.2f}x")
+        
+    def reset_speed(self):
+        self.current_speed = 1.0
+        self.player.speed = self.current_speed
+        self.speed_label.setText("1.0x")
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
