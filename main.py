@@ -2,8 +2,10 @@
 import sys
 import os
 import json
-import mpv
 import cv2
+import threading
+import time
+from PyQt6.QtCore import Qt, QTimer
 from PyQt6.QtWidgets import (QApplication, QMainWindow, QWidget, QPushButton, 
                            QVBoxLayout, QHBoxLayout, QLineEdit, QLabel, QScrollArea, QGridLayout)
 from PyQt6.QtCore import Qt
@@ -164,41 +166,78 @@ class StartWindow(QWidget):
         self.setLayout(main_layout)
         
     def play_video(self, url):
-        # Create video window
         self.video_window = QWidget()
         self.video_window.setWindowTitle("Video Player")
         self.video_window.setGeometry(300, 300, 800, 600)
         
         # Create controls
         controls_layout = QHBoxLayout()
+        self.play_pause_btn = QPushButton("Pause")
         slower_btn = QPushButton("Slower")
         faster_btn = QPushButton("Faster")
         reset_speed_btn = QPushButton("Reset Speed")
         self.speed_label = QLabel("1.0x")
         
+        controls_layout.addWidget(self.play_pause_btn)
         controls_layout.addWidget(slower_btn)
         controls_layout.addWidget(self.speed_label)
         controls_layout.addWidget(faster_btn)
         controls_layout.addWidget(reset_speed_btn)
         
         main_layout = QVBoxLayout()
+        self.video_label = QLabel()
+        main_layout.addWidget(self.video_label)
         main_layout.addLayout(controls_layout)
         self.video_window.setLayout(main_layout)
         self.video_window.show()
         
-        # Initialize MPV player
-        self.player = mpv.MPV(wid=str(int(self.video_window.winId())),
-                            input_default_bindings=True,
-                            input_vo_keyboard=True)
-        
-        # Set up speed control
+        # Video playback setup
+        self.cap = cv2.VideoCapture(url)
+        self.playing = True
         self.current_speed = 1.0
+        self.frame_delay = 1 / (self.cap.get(cv2.CAP_PROP_FPS) * self.current_speed)
+        
+        # Connect buttons
+        self.play_pause_btn.clicked.connect(self.toggle_play_pause)
         slower_btn.clicked.connect(lambda: self.change_speed(-0.25))
         faster_btn.clicked.connect(lambda: self.change_speed(0.25))
         reset_speed_btn.clicked.connect(self.reset_speed)
         
-        # Start playback
-        self.player.play(url)
+        # Start video thread
+        self.video_thread = threading.Thread(target=self.update_frame)
+        self.video_thread.daemon = True
+        self.video_thread.start()
+    
+    def update_frame(self):
+        while self.cap.isOpened():
+            if self.playing:
+                ret, frame = self.cap.read()
+                if ret:
+                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                    h, w, ch = frame.shape
+                    bytes_per_line = ch * w
+                    qt_image = QPixmap.fromImage(QImage(frame.data, w, h, bytes_per_line, QImage.Format.Format_RGB888))
+                    scaled_pixmap = qt_image.scaled(self.video_label.size(), Qt.AspectRatioMode.KeepAspectRatio)
+                    self.video_label.setPixmap(scaled_pixmap)
+                    time.sleep(self.frame_delay)
+                else:
+                    self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            else:
+                time.sleep(0.1)
+    
+    def toggle_play_pause(self):
+        self.playing = not self.playing
+        self.play_pause_btn.setText("Pause" if self.playing else "Play")
+        
+    def change_speed(self, delta):
+        self.current_speed = max(0.25, self.current_speed + delta)
+        self.frame_delay = 1 / (self.cap.get(cv2.CAP_PROP_FPS) * self.current_speed)
+        self.speed_label.setText(f"{self.current_speed:.2f}x")
+        
+    def reset_speed(self):
+        self.current_speed = 1.0
+        self.frame_delay = 1 / self.cap.get(cv2.CAP_PROP_FPS)
+        self.speed_label.setText("1.0x")
         
     def change_speed(self, delta):
         self.current_speed = max(0.25, self.current_speed + delta)
