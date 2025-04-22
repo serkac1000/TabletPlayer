@@ -13,17 +13,19 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Video Player")
-        self.setGeometry(100, 100, 400, 200)
+        self.setGeometry(100, 100, 800, 600)
         
         layout = QVBoxLayout()
         central_widget = QWidget()
         central_widget.setLayout(layout)
         self.setCentralWidget(central_widget)
         
+        # Settings button
         settings_btn = QPushButton("Settings")
         settings_btn.clicked.connect(self.open_settings)
         layout.addWidget(settings_btn)
         
+        # Start button
         start_btn = QPushButton("Start")
         start_btn.clicked.connect(self.open_start)
         layout.addWidget(start_btn)
@@ -44,6 +46,7 @@ class SettingsWindow(QWidget):
         
         layout = QVBoxLayout()
         
+        # URL input
         url_layout = QHBoxLayout()
         url_label = QLabel("Video URL:")
         self.url_input = QLineEdit()
@@ -51,6 +54,7 @@ class SettingsWindow(QWidget):
         url_layout.addWidget(self.url_input)
         layout.addLayout(url_layout)
         
+        # Name input
         name_layout = QHBoxLayout()
         name_label = QLabel("Name:")
         self.name_input = QLineEdit()
@@ -58,20 +62,23 @@ class SettingsWindow(QWidget):
         name_layout.addWidget(self.name_input)
         layout.addLayout(name_layout)
         
+        # Preview button
         preview_btn = QPushButton("Generate Preview")
         preview_btn.clicked.connect(self.generate_preview)
         layout.addWidget(preview_btn)
         
+        # Save button
         save_btn = QPushButton("Save")
         save_btn.clicked.connect(self.save_video)
         layout.addWidget(save_btn)
         
+        # Preview label
         self.preview_label = QLabel()
         layout.addWidget(self.preview_label)
         
         self.setLayout(layout)
         
-        # Create thumbnails directory if it doesn't exist
+        # Create thumbnails directory
         if not os.path.exists("thumbnails"):
             os.makedirs("thumbnails")
             
@@ -81,20 +88,17 @@ class SettingsWindow(QWidget):
         if not url or not name:
             return
             
-        instance = vlc.Instance()
-        player = instance.media_player_new()
-        media = instance.media_new(url)
-        player.set_media(media)
-        
-        # Try to capture thumbnail using OpenCV
-        cap = cv2.VideoCapture(url)
-        ret, frame = cap.read()
-        if ret:
-            preview_path = f"thumbnails/{name}.jpg"
-            cv2.imwrite(preview_path, frame)
-            pixmap = QPixmap(preview_path)
-            self.preview_label.setPixmap(pixmap.scaled(200, 150, Qt.AspectRatioMode.KeepAspectRatio))
+        try:
+            cap = cv2.VideoCapture(url)
+            ret, frame = cap.read()
+            if ret:
+                preview_path = f"thumbnails/{name}.jpg"
+                cv2.imwrite(preview_path, frame)
+                pixmap = QPixmap(preview_path)
+                self.preview_label.setPixmap(pixmap.scaled(200, 150, Qt.AspectRatioMode.KeepAspectRatio))
             cap.release()
+        except Exception as e:
+            print(f"Error generating preview: {e}")
             
     def save_video(self):
         url = self.url_input.text()
@@ -132,11 +136,13 @@ class StartWindow(QWidget):
         scroll_content = QWidget()
         grid_layout = QGridLayout()
         
+        # Load saved videos
         videos = []
         if os.path.exists("videos.json"):
             with open("videos.json", "r") as f:
                 videos = json.load(f)
                 
+        # Create buttons for each video
         row = 0
         col = 0
         for video in videos:
@@ -163,7 +169,7 @@ class StartWindow(QWidget):
         media = instance.media_new(url)
         player.set_media(media)
         
-        # Create a basic window for the video
+        # Create video window
         self.video_window = QWidget()
         self.video_window.setWindowTitle("Video Player")
         self.video_window.setGeometry(300, 300, 800, 600)
