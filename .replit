@@ -4,25 +4,26 @@ modules = ["python-3.11"]
 
 [nix]
 channel = "stable-24_05"
-packages = ["libGL", "libGLU", "libvlc", "qt6.full", "xorg.libX11", "xorg.libXrender", "xorg.libxkbcommon"]
-
-[unitTest]
-language = "python3"
-
-[gitHubImport]
-requiredFiles = [".replit", "replit.nix"]
+packages = [
+    "libGL",
+    "libGLU", 
+    "libvlc",
+    "qt6.full",
+    "xorg.libX11",
+    "xorg.libXrender",
+    "xorg.libxkbcommon",
+    "xorg.libXext",
+    "xorg.libXft",
+    "xorg.libXinerama",
+    "xorg.libXrandr",
+    "xorg.libXcursor",
+    "xorg.libXi",
+    "xorg.libXcomposite"
+]
 
 [deployment]
 run = ["python3", "main.py"]
 deploymentTarget = "cloudrun"
 
-[workflows]
-
-[[workflows.workflow]]
-name = "Run"
-author = 41799911
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "python3 main.py"
+[workflows.Run]
+commands = ["python3 main.py"]
