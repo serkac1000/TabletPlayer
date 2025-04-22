@@ -176,9 +176,14 @@ class StartWindow(QWidget):
         
         if sys.platform == "win32":
             player.set_hwnd(int(self.video_window.winId()))
+        else:
+            player.set_xwindow(int(self.video_window.winId()))
         
         self.video_window.show()
         player.play()
+        
+        # Store player reference to prevent garbage collection
+        self.player = player
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
