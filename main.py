@@ -164,8 +164,9 @@ class StartWindow(QWidget):
         self.setLayout(main_layout)
         
     def play_video(self, url):
-        # Initialize VLC with specific parameters
-        instance = vlc.Instance('--no-xlib')
+        # Initialize VLC with specific parameters for X11
+        os.environ["DISPLAY"] = ":0"
+        instance = vlc.Instance(['--no-xlib', '--vout', 'x11'])
         player = instance.media_player_new()
         media = instance.media_new(url)
         player.set_media(media)
@@ -174,6 +175,7 @@ class StartWindow(QWidget):
         self.video_window = QWidget()
         self.video_window.setWindowTitle("Video Player")
         self.video_window.setGeometry(300, 300, 800, 600)
+        self.video_window.setAttribute(Qt.WidgetAttribute.WA_NativeWindow)
         self.video_window.show()
         
         # Give the window time to be fully created
