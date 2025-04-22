@@ -164,7 +164,8 @@ class StartWindow(QWidget):
         self.setLayout(main_layout)
         
     def play_video(self, url):
-        instance = vlc.Instance()
+        # Initialize VLC with specific parameters
+        instance = vlc.Instance('--no-xlib')
         player = instance.media_player_new()
         media = instance.media_new(url)
         player.set_media(media)
@@ -173,17 +174,20 @@ class StartWindow(QWidget):
         self.video_window = QWidget()
         self.video_window.setWindowTitle("Video Player")
         self.video_window.setGeometry(300, 300, 800, 600)
+        self.video_window.show()
         
+        # Give the window time to be fully created
+        QApplication.processEvents()
+        
+        # Set the window handle
         if sys.platform == "win32":
             player.set_hwnd(int(self.video_window.winId()))
         else:
             player.set_xwindow(int(self.video_window.winId()))
         
-        self.video_window.show()
-        player.play()
-        
-        # Store player reference to prevent garbage collection
+        # Store player reference and start playback
         self.player = player
+        player.play()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
